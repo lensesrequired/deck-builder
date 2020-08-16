@@ -1,16 +1,67 @@
-html,
 body {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+main {
+    box-sizing: border-box;
+    display: grid;
+    font-family: 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', 'Helvetica',
+    'Arial', sans-serif;
+    hyphens: auto;
+    line-height: 1.65;
+    min-height: 100vh;
+    max-width: 100vw;
+    text-align: center;
+}
+
+h1 {
+    font-size: 45px;
+    margin: 10px 0;
+}
+
+h2 {
+    margin-top: 1.5em;
+}
+
+p {
+    font-size: 16px;
 }
 
 a {
-  color: inherit;
-  text-decoration: none;
+    border-bottom: 1px solid white;
+    color: #0076ff;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
 }
 
-* {
-  box-sizing: border-box;
+a:hover {
+    border-bottom: 1px solid #0076ff;
+}
+
+.ui.inverted.dimmer {
+    background-color: rgba(255, 255, 255, .5) !important;
+}
+
+.ui.inverted.dimmer:hover {
+    background-color: rgba(255, 255, 255, .3) !important;
+}
+
+.ui.inverted.dimmer i {
+    color: gray !important;
+}
+
+.ui.inverted.dimmer:hover i {
+    color: black !important;
 }

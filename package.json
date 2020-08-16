@@ -3,13 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3002",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "next": "9.5.1",
     "react": "16.13.1",
-    "react-dom": "16.13.1"
+    "react-dom": "16.13.1",
+    "react-semantic-toasts": "^0.6.5",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^1.2.0",
+    "uuid": "^8.3.0"
+  },
+  "devDependencies": {
+    "@iconify/icons-mdi": "^1.0.130",
+    "@iconify/react": "^1.1.3"
   }
 }
