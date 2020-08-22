@@ -1,0 +1,144 @@
+[
+  {
+    "actions": [
+      {
+        "qty": "2",
+        "required": true,
+        "type": "destroy"
+      }
+    ],
+    "art": "characters/FantasyCardsPack_049.PNG",
+    "buyingPower": 0,
+    "costBuy": "3",
+    "name": "Death Bringer",
+    "qty": "10",
+    "victoryPoints": "5"
+  },
+  {
+    "actions": [],
+    "art": "items/coin.png",
+    "buyingPower": "2",
+    "costBuy": "3",
+    "name": "Gold",
+    "qty": "15",
+    "victoryPoints": 0
+  },
+  {
+    "actions": [],
+    "art": "items/gem.png",
+    "buyingPower": "1",
+    "costBuy": "2",
+    "name": "Ore",
+    "qty": "40",
+    "victoryPoints": 0
+  },
+  {
+    "actions": [],
+    "art": "items/pancakes.PNG",
+    "buyingPower": 0,
+    "costBuy": "2",
+    "name": "Fluffies",
+    "qty": "30",
+    "victoryPoints": "1"
+  },
+  {
+    "actions": [
+      {
+        "qty": "1",
+        "required": false,
+        "type": "buy"
+      }
+    ],
+    "art": "items/chest.png",
+    "buyingPower": "3",
+    "costBuy": "4",
+    "name": "Treasure Trove",
+    "qty": "15",
+    "victoryPoints": 0
+  },
+  {
+    "actions": [
+      {
+        "qty": "1",
+        "required": false,
+        "type": "action"
+      },
+      {
+        "qty": "2",
+        "required": false,
+        "type": "buy"
+      }
+    ],
+    "art": "characters/wood_spider.PNG",
+    "buyingPower": "2",
+    "costBuy": "4",
+    "name": "Sticky Hands",
+    "qty": "10",
+    "victoryPoints": 0
+  },
+  {
+    "actions": [
+      {
+        "qty": "1",
+        "required": false,
+        "type": "draw"
+      },
+      {
+        "qty": "1",
+        "required": false,
+        "type": "action"
+      }
+    ],
+    "art": "items/Artifact_helmet.PNG",
+    "buyingPower": 0,
+    "costBuy": "4",
+    "name": "Helmet",
+    "qty": "10",
+    "victoryPoints": "2"
+  },
+  {
+    "actions": [
+      {
+        "qty": "1",
+        "required": true,
+        "type": "draw"
+      },
+      {
+        "qty": "2",
+        "required": false,
+        "type": "action"
+      },
+      {
+        "qty": "1",
+        "required": false,
+        "type": "buy"
+      }
+    ],
+    "art": "characters/spider_king.PNG",
+    "buyingPower": "3",
+    "costBuy": "8",
+    "name": "King's Blessing",
+    "qty": "10",
+    "victoryPoints": "5"
+  },
+  {
+    "actions": [
+      {
+        "qty": "2",
+        "required": false,
+        "type": "draw"
+      },
+      {
+        "qty": "1",
+        "required": false,
+        "type": "action"
+      }
+    ],
+    "art": "characters/FantasyCardsPack_003.PNG",
+    "buyingPower": 0,
+    "costBuy": "3",
+    "name": "Fearless Sidekick",
+    "qty": "10",
+    "victoryPoints": "1"
+  }
+]

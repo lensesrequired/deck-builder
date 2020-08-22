@@ -1,0 +1,7 @@
+{
+  "name": "deckbuilder",
+  "version": 2,
+  "env": {
+    "MONGO_URL": "@mongo-deckbuilder-url"
+  }
+}
