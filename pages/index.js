@@ -115,7 +115,11 @@ class Creator extends React.Component {
 
   exportPDF = () => {
     this.setState({ isDownloading: true });
-    fetch(`https://deck-builder-api.herokuapp.com/deck/pdf/${ uuid() }`)
+    fetch(`https://deck-builder-api.herokuapp.com/deck/pdf/${ uuid() }`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(this.state.cards)
+    })
       .then(async (response) => {
         const downloadPDF = (data) => {
           const dlAnchorElem = document.createElement('a');
