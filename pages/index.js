@@ -21,7 +21,7 @@ class Creator extends React.Component {
 
   getCardImage = async (id) => {
     const { cardImages } = this.state;
-    let url = 'https://deck-builder-api.herokuapp.com/deck/images/' + this.props.id;
+    let url = 'https://deck-builder-api.herokuapp.com/deck/images/' + uuid();
     if (id) {
       url += `?card_id=${ id }`;
     }
@@ -39,7 +39,7 @@ class Creator extends React.Component {
   getCards = async (getImages = false) => {
     const { cardImages } = this.state;
     this.setState({ isLoading: true });
-    fetch('https://deck-builder-api.herokuapp.com/deck/' + this.props.id)
+    fetch('/api/deck/' + this.props.id)
       .then(async (response) => {
         const deck = await response.json();
         const { cards } = deck;
@@ -57,7 +57,7 @@ class Creator extends React.Component {
   };
 
   updateCards = async (cards, reload = true) => {
-    fetch('https://deck-builder-api.herokuapp.com/cards/' + this.props.id, {
+    fetch('/api/cards/' + this.props.id, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(JSON.parse(JSON.stringify(cards)).map((c) => {
@@ -111,7 +111,7 @@ class Creator extends React.Component {
 
   exportPDF = () => {
     this.setState({ isDownloading: true });
-    fetch(`https://deck-builder-api.herokuapp.com/deck/${ this.props.id }/pdf/${ uuid() }`)
+    fetch(`https://deck-builder-api.herokuapp.com/deck/pdf/${ uuid() }`)
       .then(async (response) => {
         const downloadPDF = (data) => {
           const dlAnchorElem = document.createElement('a');
@@ -132,7 +132,7 @@ class Creator extends React.Component {
 
   createGame = () => {
     this.setState({ isDownloading: true });
-    fetch(`https://deck-builder-api.herokuapp.com/games/create/${ this.props.id }`, { method: 'POST' })
+    fetch(`/game/create/${ this.props.id }`, { method: 'POST' })
       .then(async (response) => {
         const gameId = await response.json();
         window.location = '/game?id=' + gameId;
@@ -182,15 +182,20 @@ class Creator extends React.Component {
   };
 
   componentDidMount(prevProps, prevState, snapshot) {
-    if (this.props.id) {
-      return [this.getCards(), this.getCardImage()];
-    }
+    try {
+      if (this.props.id) {
+        return [this.getCards(), this.getCardImage()];
+      }
 
-    fetch('https://deck-builder-api.herokuapp.com/deck', { method: 'POST' })
-      .then(async (response) => {
-        const deckId = await response.json();
-        this.props.setId(deckId);
-      });
+      fetch('/api/deck', { method: 'POST' })
+        .then(async (response) => {
+          console.log(response);
+          const deck = await response.json();
+          this.props.setId(deck._id);
+        });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {

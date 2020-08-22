@@ -1,13 +1,11 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const getConnection = require('../../../server');
 const Game = require('../../models/game');
 const Player = require('../../models/player');
 const Deck = require('../../models/deck');
 
-mongoose.connect(process.env.MONGO_URL, {
-  useNewUrlParser: true
-});
-export default handler = (req, res) => {
+getConnection('mongo');
+export default (req, res) => {
   const {
     query: { id },
     method

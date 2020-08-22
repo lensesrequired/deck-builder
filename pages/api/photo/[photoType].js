@@ -1,6 +1,6 @@
 import artFiles from '/public/cards';
 
-export default handler = (req, res) => {
+export default (req, res) => {
   const {
     query: { photoType },
     method

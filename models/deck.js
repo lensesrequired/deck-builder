@@ -13,4 +13,4 @@ DeckSchema.methods.shuffle = () => {
   return Array.from(this.cards).sort(() => Math.random() - 0.5);
 };
 
-module.exports = mongoose.model('Deck', DeckSchema);
+module.exports = mongoose.models.Deck || mongoose.model('Deck', DeckSchema);

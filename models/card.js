@@ -19,7 +19,6 @@ const CardActionSchema = new Schema({
     required: 'Card actions must have qty greater than -1'
   }
 });
-const CardAction = mongoose.model('CardAction', CardActionSchema);
 
 const CardSchema = new Schema({
   modifiedAt: {
@@ -39,7 +38,7 @@ const CardSchema = new Schema({
     required: 'Kindly enter the name of the card'
   },
   actions: {
-    type: [CardAction]
+    type: [CardActionSchema]
   },
   costBuy: {
     type: Number,
@@ -59,4 +58,4 @@ CardSchema.methods.decreaseQty = () => {
   this.qty -= 1;
 };
 
-module.exports = mongoose.model('Card', CardSchema);
+module.exports = CardSchema;

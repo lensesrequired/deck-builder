@@ -33,7 +33,7 @@ class ArtModal extends React.Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevState.photoType !== this.state.photoType) {
       this.setState({ isLoading: true });
-      fetch('https://deck-builder-api.herokuapp.com/photo/' + this.state.photoType)
+      fetch('/api/photo/' + this.state.photoType)
         .then(async (response) => {
           this.setState({ artNames: await response.json(), isLoading: false });
         });

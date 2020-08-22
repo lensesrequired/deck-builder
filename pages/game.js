@@ -20,14 +20,14 @@ class Game extends React.Component {
 
   getGame = async (getDeck = false) => {
     this.setState({ isLoading: true });
-    fetch('https://deck-builder-api.herokuapp.com/games/' + this.props.id)
+    fetch('/api/game/' + this.props.id)
       .then(async (response) => {
         const game = await response.json();
         if (!response.ok) {
           throw ({ title: game.statusText || '', description: game.message || '' });
         }
         if (getDeck) {
-          fetch('https://deck-builder-api.herokuapp.com/deck/' + game.deck_id)
+          fetch('/api/deck/' + game.deck_id)
             .then(async (response) => {
               const deck = await response.json();
               if (!response.ok) {
@@ -48,7 +48,7 @@ class Game extends React.Component {
   };
 
   getCardImages = async () => {
-    fetch('https://deck-builder-api.herokuapp.com/deck/images/' + this.state.game.deck_id)
+    fetch('/api/deck/images/' + this.state.game.deck_id)
       .then(async (response) => {
         if (this.state.game.deck_id) {
           const card_images = await response.json();
@@ -69,7 +69,7 @@ class Game extends React.Component {
 
   startGame = async () => {
     this.setState({ isLoading: true });
-    fetch('https://deck-builder-api.herokuapp.com/games/' + this.props.id + '/start', { method: 'POST' })
+    fetch('/api/game/' + this.props.id + '/start', { method: 'POST' })
       .then(async (response) => {
         const game = await response.json();
         if (!response.ok) {
@@ -83,7 +83,7 @@ class Game extends React.Component {
   };
 
   saveSettings = (settings) => {
-    fetch('https://deck-builder-api.herokuapp.com/games/' + this.props.id + '/settings', {
+    fetch('/api/game/' + this.props.id + '/settings', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(settings)
     }).then(async (response) => {
@@ -108,7 +108,7 @@ class Game extends React.Component {
   }
 
   turn_action = (action) => {
-    fetch('https://deck-builder-api.herokuapp.com/games/' + this.props.id + '/player/' + action, { method: 'POST' })
+    fetch('/api/game/' + this.props.id + '/player/' + action, { method: 'POST' })
       .then(async (response) => {
         const res = await response.json();
         if (!response.ok || await res !== 'OK') {
@@ -123,7 +123,7 @@ class Game extends React.Component {
   };
 
   card_action = (action, query = {}) => {
-    let url = `https://deck-builder-api.herokuapp.com/games/${ this.props.id }/player/card/${ action }`;
+    let url = `/game/${ this.props.id }/player/card/${ action }`;
     if (query) {
       url += `?${ Object.entries(query).map(([key, value]) => (`${ key }=${ value }`)).join('&') }`;
     }
