@@ -1,4 +1,4 @@
-import artFiles from '/public/cards';
+const { artFiles } = require('../../../constants');
 
 export default (req, res) => {
   const {
@@ -7,7 +7,7 @@ export default (req, res) => {
   } = req;
 
   switch (method) {
-    case 'POST':
+    case 'GET':
       res.send(artFiles[photoType] || []);
       break;
     default:

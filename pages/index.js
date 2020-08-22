@@ -19,54 +19,58 @@ class Creator extends React.Component {
     this.fileInputRef = React.createRef();
   }
 
-  getCardImage = async (id) => {
+  getCardImages = async (cards) => {
     const { cardImages } = this.state;
     let url = 'https://deck-builder-api.herokuapp.com/deck/images/' + uuid();
-    if (id) {
-      url += `?card_id=${ id }`;
-    }
-    fetch(url)
-      .then(async (response) => {
-        const images = await response.json();
-        images.forEach(({ id, data, modified_at }) => {
-          cardImages[id] = { data, modified_at };
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cards)
+    }).then(async (response) => {
+      console.log(response);
+      const images = await response.json();
+      console.log(images);
+      if (response.ok) {
+        images.forEach(({ _id, data, modifiedAt }) => {
+          cardImages[_id] = { data, modifiedAt };
         });
+      } else {
+        // TODO: Show error
+      }
 
-        this.setState({ cardImages });
-      });
+      this.setState({ cardImages });
+    });
   };
 
-  getCards = async (getImages = false) => {
+  getCards = async () => {
     const { cardImages } = this.state;
     this.setState({ isLoading: true });
     fetch('/api/deck/' + this.props.id)
       .then(async (response) => {
-        const deck = await response.json();
-        const { cards } = deck;
-        if (getImages) {
-          cards.forEach(({ id, modified_at }) => {
-            if (!cardImages[id] || Math.abs(new Date(cardImages[id].modified_at) - new Date(modified_at)) > 1000) {
-              cardImages[id] = {};
-              this.getCardImage(id);
-            }
-          });
+        if (response.ok) {
+          const deck = await response.json();
+          const { cards } = deck;
+          this.setState({ cards, isLoading: false });
+        } else {
+          // TODO: Handle error
+          this.setState({ isLoading: false });
         }
-
-        this.setState({ cards, cardImages, isLoading: false });
       });
   };
 
   updateCards = async (cards, reload = true) => {
-    fetch('/api/cards/' + this.props.id, {
+    fetch('/api/deck/' + this.props.id, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(JSON.parse(JSON.stringify(cards)).map((c) => {
-        delete c.image;
-        return c;
-      }))
-    }).then(() => {
+      body: JSON.stringify({
+        cards: JSON.parse(JSON.stringify(cards)).map((c) => {
+          delete c.image;
+          return c;
+        })
+      })
+    }).then((response) => {
       if (reload) {
-        this.getCards(true);
+        this.getCards();
       } else {
         this.setState({ cards });
       }
@@ -77,7 +81,7 @@ class Creator extends React.Component {
     const { cards } = this.state;
     const newCard = {
       ...card,
-      modified_at: new Date(),
+      modifiedAt: new Date(),
       actions: Object.entries(actions).reduce((acc, [type, { qty, required }]) => {
         if (qty && qty !== '0') {
           acc.push({ type, qty, required });
@@ -87,7 +91,7 @@ class Creator extends React.Component {
     };
     this.state.editCardIndex > -1 ?
       cards.splice(this.state.editCardIndex, 1, newCard) :
-      cards.push({ id: uuid(), ...newCard });
+      cards.push(newCard);
     this.updateCards(cards);
     this.setState({ isModalOpen: false });
   };
@@ -97,8 +101,8 @@ class Creator extends React.Component {
     const { cards } = JSON.parse(JSON.stringify(this.state));
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(
       JSON.stringify(cards.map((c) => {
-        delete c.id;
-        delete c.modified_at;
+        delete c._id;
+        delete c.modifiedAt;
         return c;
       }))
     );
@@ -170,8 +174,7 @@ class Creator extends React.Component {
       if (Array.isArray(obj)) {
         setCards([
           ...cards, ...(obj.map((card) => {
-            card.id = uuid();
-            card.modified_at = new Date();
+            card.modifiedAt = new Date();
             return card;
           }))]);
       } else {
@@ -181,26 +184,35 @@ class Creator extends React.Component {
     reader.readAsText(target.files[0]);
   };
 
+  //5f413ce5fbbd4f58512549e0
   componentDidMount(prevProps, prevState, snapshot) {
-    try {
-      if (this.props.id) {
-        return [this.getCards(), this.getCardImage()];
-      }
-
-      fetch('/api/deck', { method: 'POST' })
-        .then(async (response) => {
-          console.log(response);
-          const deck = await response.json();
-          this.props.setId(deck._id);
-        });
-    } catch (e) {
-      console.log(e);
+    if (this.props.id) {
+      return this.getCards();
     }
+    fetch('/api/deck', { method: 'POST' })
+      .then(async (response) => {
+        const deck = await response.json();
+        this.props.setId(deck._id);
+      });
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.id !== prevProps.id) {
-      return [this.getCards(), this.getCardImage()];
+      return this.getCards();
+    }
+    if (this.state.cards !== prevState.cards) {
+      const { cardImages } = this.state;
+      const newImages = [];
+      this.state.cards.forEach((card) => {
+        const { _id, modifiedAt } = card;
+        if (!cardImages[_id] || Math.abs(new Date(cardImages[_id].modifiedAt) - new Date(modifiedAt)) > 1000) {
+          cardImages[_id] = {};
+          newImages.push(card);
+        }
+      });
+      this.setState({ cardImages }, () => {
+        this.getCardImages(newImages);
+      });
     }
   }
 
@@ -228,9 +240,9 @@ class Creator extends React.Component {
           { isLoading ? <p>{ 'LOADING' }</p> : (cards || []).map(
             (card, index) => (
               <div style={ { padding: '10px', display: 'flex', flexDirection: 'column' } }>
-                { (cardImages[card.id] || {}).data ?
+                { (cardImages[card._id] || {}).data ?
                   <img alt={ 'card' } style={ { height: '400px', marginBottom: '10px' } }
-                       src={ `data:image/png;base64,${ cardImages[card.id].data }` }/> : 'Loading...' }
+                       src={ `data:image/png;base64,${ cardImages[card._id].data }` }/> : 'Loading...' }
                 <Input label={ 'Qty' } style={ { marginBottom: '3px' } } type={ 'number' }
                        value={ card.qty === '0' ? '' : card.qty }
                        onChange={ (_, { value }) => this.updateQty(index, value) }/>
@@ -252,4 +264,7 @@ class Creator extends React.Component {
   }
 }
 
+Creator.getInitialProps = ({ query: { id } = {} }) => {
+  return { id };
+};
 export default Creator;

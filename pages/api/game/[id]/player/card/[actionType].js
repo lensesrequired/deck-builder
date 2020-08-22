@@ -1,10 +1,10 @@
 require('dotenv').config();
-const getConnection = require('../../../../../../server');
+const connectMongo = require('../../../../../../server');
 const Game = require('../../models/game');
 const Player = require('../../models/player');
 
-getConnection('mongo');
-export default (req, res) => {
+export default async (req, res) => {
+  await connectMongo();
   const {
     query: { id, actionType, index, num },
     method
