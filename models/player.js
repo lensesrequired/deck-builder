@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const Deck = require('./deck');
+const { actionTypes } = require('../constants');
+const { Deck, DeckSchema } = require('./deck');
 
 const PlayerSchema = new Schema({
   name: {
@@ -8,15 +9,15 @@ const PlayerSchema = new Schema({
     required: 'Player must have a name'
   },
   hand: {
-    type: Deck,
+    type: DeckSchema,
     default: new Deck()
   },
   discardPile: {
-    type: Deck,
+    type: DeckSchema,
     default: new Deck()
   },
   deck: {
-    type: Deck,
+    type: DeckSchema,
     default: new Deck()
   },
   currentTurn:
@@ -171,4 +172,4 @@ PlayerSchema.methods.buy = ({ index }, game) => {
   return game;
 };
 
-module.exports = mongoose.model('Player', PlayerSchema);
+module.exports = PlayerSchema;

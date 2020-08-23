@@ -1,10 +1,10 @@
 import React from 'react';
+import { v1 as uuid } from 'uuid';
 import { Button, Table } from 'semantic-ui-react';
 import { Icon, InlineIcon } from '@iconify/react';
 import infinityIcon from '@iconify/icons-mdi/infinity';
 import { SemanticToastContainer, toast } from 'react-semantic-toasts';
 import SettingsModal from '../components/game/settingsModal';
-import 'react-semantic-toasts/styles/react-semantic-alert.css';
 
 class Game extends React.Component {
   constructor(props) {
@@ -20,51 +20,62 @@ class Game extends React.Component {
 
   getGame = async (getDeck = false) => {
     this.setState({ isLoading: true });
-    fetch('/api/game/' + this.props.id)
-      .then(async (response) => {
-        const game = await response.json();
-        if (!response.ok) {
-          throw ({ title: game.statusText || '', description: game.message || '' });
-        }
-        if (getDeck) {
-          fetch('/api/deck/' + game.deck_id)
-            .then(async (response) => {
-              const deck = await response.json();
-              if (!response.ok) {
-                throw ({ title: deck.statusText || '', description: deck.message || '' });
-              }
-              this.setState({ game, deck, isLoading: false });
-            })
-            .catch((err) => {
-              toast(err);
-            });
-        } else {
-          this.setState({ game, isLoading: false });
-        }
-      })
-      .catch((err) => {
-        toast(err);
-      });
+    if (this.props.id) {
+      fetch('/api/game/' + this.props.id)
+        .then(async (response) => {
+          const game = await response.json();
+          if (!response.ok) {
+            throw ({ title: game.statusText || '', description: game.message || '' });
+          }
+          if (getDeck) {
+            fetch('/api/deck/' + game.deckId)
+              .then(async (response) => {
+                const deck = await response.json();
+                if (!response.ok) {
+                  throw ({ title: deck.statusText || '', description: deck.message || '' });
+                }
+                this.setState({ game, deck, isLoading: false });
+              })
+              .catch((err) => {
+                toast(err);
+              });
+          } else {
+            this.setState({ game, isLoading: false });
+          }
+        })
+        .catch((err) => {
+          toast(err);
+        });
+    }
   };
 
   getCardImages = async () => {
-    fetch('/api/deck/images/' + this.state.game.deck_id)
-      .then(async (response) => {
-        if (this.state.game.deck_id) {
-          const card_images = await response.json();
-          if (!response.ok) {
-            throw ({ title: card_images.statusText || '', description: card_images.message || '' });
-          }
-          const images = card_images.reduce((acc, { id, data, modified_at }) => {
-            acc[id] = { data, modified_at };
-            return acc;
-          }, {});
-          this.setState({ images });
-        }
-      })
-      .catch((err) => {
-        toast(err);
-      });
+    fetch('/api/deck/' + this.state.game.deckId).then(async (response) => {
+      if (response.ok) {
+        const { cards } = await response.json();
+        fetch('https://deck-builder-api.herokuapp.com/deck/images/' + uuid(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cards)
+        })
+          .then(async (response) => {
+            if (this.state.game.deckId) {
+              const card_images = await response.json();
+              if (!response.ok) {
+                throw ({ title: card_images.statusText || '', description: card_images.message || '' });
+              }
+              const images = card_images.reduce((acc, { id, data, modified_at }) => {
+                acc[id] = { data, modified_at };
+                return acc;
+              }, {});
+              this.setState({ images });
+            }
+          })
+          .catch((err) => {
+            toast(err);
+          });
+      }
+    });
   };
 
   startGame = async () => {
@@ -102,7 +113,7 @@ class Game extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.state.game.deck_id && prevState.game.deck_id !== this.state.game.deck_id) {
+    if (this.state.game.deckId && prevState.game.deckId !== this.state.game.deckId) {
       this.getCardImages();
     }
   }
@@ -190,7 +201,7 @@ class Game extends React.Component {
           overflowY: 'scroll', flexWrap: 'wrap', margin: '5px',
           backgroundColor: 'lightgray'
         } }>
-          { (game.marketplace || []).map(
+          { ((game.marketplace || {}).cards || []).map(
             (card, index) => (
               <div style={ { padding: '10px', display: 'flex', flexDirection: 'column' } }>
                 { images[card.id] ?
@@ -274,4 +285,7 @@ class Game extends React.Component {
   }
 }
 
+Game.getInitialProps = ({ query: { id } = {} }) => {
+  return { id };
+};
 export default Game;

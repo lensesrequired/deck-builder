@@ -27,9 +27,7 @@ class Creator extends React.Component {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(cards)
     }).then(async (response) => {
-      console.log(response);
       const images = await response.json();
-      console.log(images);
       if (response.ok) {
         images.forEach(({ _id, data, modifiedAt }) => {
           cardImages[_id] = { data, modifiedAt };
@@ -140,10 +138,11 @@ class Creator extends React.Component {
 
   createGame = () => {
     this.setState({ isDownloading: true });
-    fetch(`/game/create/${ this.props.id }`, { method: 'POST' })
+    fetch(`/api/game/${ this.props.id }`, { method: 'POST' })
       .then(async (response) => {
-        const gameId = await response.json();
-        window.location = '/game?id=' + gameId;
+        console.log(response);
+        const { _id } = await response.json();
+        window.location = '/game?id=' + _id;
       });
   };
 

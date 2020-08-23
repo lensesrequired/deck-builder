@@ -2,7 +2,7 @@ require('dotenv').config();
 const connectMongo = require('../../../server');
 const Game = require('../../models/game');
 const Player = require('../../models/player');
-const Deck = require('../../models/deck');
+const { Deck } = require('../../models/deck');
 
 export default async (req, res) => {
   await connectMongo();

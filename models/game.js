@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 const _ = require('lodash');
-const Deck = require('./deck');
-const Player = require('./player');
+const Schema = mongoose.Schema;
 const { actionTypes } = require('../constants');
+const { Deck, DeckSchema } = require('./deck');
+const PlayerSchema = require('./player');
 
 const TurnSchema = new Schema(
   ['pre', 'during', 'post'].reduce((steps, turnStep) => {
@@ -25,7 +25,6 @@ const TurnSchema = new Schema(
     return steps;
   }, {})
 );
-const Turn = mongoose.model('Turn', TurnSchema);
 
 const TriggerSchema = new Schema({
   type: {
@@ -40,7 +39,6 @@ const TriggerSchema = new Schema({
     required: 'The end of game trigger must have a positive qty'
   }
 });
-const Trigger = mongoose.model('Trigger', TriggerSchema);
 
 const SettingsSchema = new Schema({
   numPlayers: {
@@ -49,7 +47,7 @@ const SettingsSchema = new Schema({
     required: 'You must have at least one player'
   },
   startingDeck: {
-    type: Deck,
+    type: DeckSchema,
     required: 'You must set a starting deck for players'
   },
   handSize: {
@@ -58,14 +56,13 @@ const SettingsSchema = new Schema({
     required: 'You must set a non-negative hand size'
   },
   turn: {
-    type: Turn
+    type: TurnSchema
   },
   endTrigger: {
-    type: Trigger,
+    type: TriggerSchema,
     required: 'There must be an end of game trigger'
   }
 });
-const Settings = mongoose.model('Settings', SettingsSchema);
 
 const GameSchema = new Schema({
   deckId: {
@@ -73,7 +70,7 @@ const GameSchema = new Schema({
     required: 'A game must have an associated deckId'
   },
   settings: {
-    type: Settings
+    type: SettingsSchema
   },
   currentPlayer: {
     type: Number,
@@ -81,19 +78,19 @@ const GameSchema = new Schema({
     default: -1
   },
   players: {
-    type: [Player],
+    type: [PlayerSchema],
     default: []
   },
   marketplace: {
-    type: Deck,
+    type: DeckSchema,
     default: new Deck()
   },
   discardPile: {
-    type: Deck,
+    type: DeckSchema,
     default: new Deck()
   },
   destroy: {
-    type: Deck,
+    type: DeckSchema,
     default: new Deck()
   },
   numTurns: {
@@ -135,4 +132,4 @@ GameSchema.methods.calculateStats = () => {
   this.gameEnded = stats;
 };
 
-module.exports = mongoose.model('Game', GameSchema);
+module.exports = mongoose.models.Game || mongoose.model('Game', GameSchema);
