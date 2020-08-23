@@ -28,11 +28,11 @@ class CardPicker extends React.Component {
           } }>
             { cards.map((card) => (
               <div style={ { padding: '10px', display: 'flex', flexDirection: 'column' } }>
-                { images[card.id] ?
+                { images[card._id] ?
                   <img alt={ 'card' } style={ { height: '300px', marginBottom: '10px' } }
-                       src={ `data:image/png;base64,${ images[card.id].data }` }/> : 'LOADING...' }
-                <div><Input type="number" label='Qty' value={ selectedCards[card.id] || '' }
-                            onChange={ (_, { value }) => this.selectCard(card.id, value) }/>
+                       src={ `data:image/png;base64,${ images[card._id].data }` }/> : 'LOADING...' }
+                <div><Input type="number" label='Qty' value={ selectedCards[card._id] || '' }
+                            onChange={ (_, { value }) => this.selectCard(card._id, value) }/>
                 </div>
               </div>
             )) }

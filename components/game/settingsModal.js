@@ -16,27 +16,28 @@ class SettingsModal extends React.Component {
           title: 'Players',
           active: true,
           valid: () => (this.state.game.numPlayers && this.state.game.numPlayers !== '0' && this.state.game.handSize &&
-            this.state.game.handSize !== '0' && this.state.game.startingDeck.length)
+            this.state.game.handSize !== '0' && this.state.game.startingDeck.cards &&
+            this.state.game.startingDeck.cards.length)
         },
         {
           icon: 'map',
           title: 'Marketplace',
           active: false,
-          valid: () => (this.state.game.marketplace.length)
+          valid: () => (this.state.game.marketplace.cards && this.state.game.marketplace.cards.length)
         },
         {
           icon: 'trophy',
           title: 'Game Play',
           active: false,
-          valid: () => (this.state.game.end_trigger.type && this.state.game.end_trigger.qty &&
-            this.state.game.end_trigger.qty !== '0')
+          valid: () => (this.state.game.endTrigger.type && this.state.game.endTrigger.qty &&
+            this.state.game.endTrigger.qty !== '0')
         }
       ],
       game: {
         numPlayers: '2',
         handSize: '5',
-        startingDeck: [],
-        marketplace: [],
+        startingDeck: {},
+        marketplace: {},
         turn: {
           pre: {
             'draw': { required: 0 },
@@ -54,7 +55,7 @@ class SettingsModal extends React.Component {
             'discard': { required: -1 }
           }
         },
-        end_trigger: {
+        endTrigger: {
           type: '',
           qty: ''
         }
@@ -64,15 +65,18 @@ class SettingsModal extends React.Component {
 
   setDeck = (startingDeck, selectedCards, deckName, openFlag) => {
     const newDeck = startingDeck.reduce((acc, card) => {
-      if (selectedCards[card.id] && selectedCards[card.id] !== '0') {
+      if (selectedCards[card._id] && selectedCards[card._id] !== '0') {
         const newCard = JSON.parse(JSON.stringify(card));
-        newCard.qty = selectedCards[card.id];
+        newCard.qty = selectedCards[card._id];
         acc.push(newCard);
       }
       return acc;
     }, []);
 
-    this.setState({ [openFlag]: false, game: { ...this.state.game, [deckName]: newDeck } });
+    this.setState({
+      [openFlag]: false,
+      game: { ...this.state.game, [deckName]: { ...this.state.game[deckName], cards: newDeck } }
+    });
   };
 
   onInput = (event, { name, value }) => {
@@ -141,7 +145,9 @@ class SettingsModal extends React.Component {
                     trigger={
                       <Button onClick={ () => this.setState({ isStartingDeckPickerOpen: true }) }>Select Cards</Button>
                     }/>
-        Number of Cards: { game.startingDeck.reduce((acc, card) => (acc + parseInt(card.qty, 10)), 0) }
+        Number of Cards: {
+        ((game.startingDeck || {}).cards || []).reduce((acc, card) => (acc + parseInt(card.qty, 10)), 0)
+      }
       </Form.Field>
     </div>,
     'Marketplace': <div>
@@ -155,7 +161,8 @@ class SettingsModal extends React.Component {
                       trigger={
                         <Button onClick={ () => this.setState({ isMarketplacePickerOpen: true }) }>Select Cards</Button>
                       }/>
-          Number of Cards: { game.marketplace.reduce((acc, card) => (acc + parseInt(card.qty, 10)), 0) }
+          Number of Cards: { ((game.marketplace || {}).cards || []).reduce(
+          (acc, card) => (acc + parseInt(card.qty, 10)), 0) }
         </div>
       </Form.Field>
     </div>,
@@ -181,12 +188,12 @@ class SettingsModal extends React.Component {
           label={ <Dropdown
             placeholder={ 'Trigger Type' } selection
             onChange={ (event, { value }) => this.setState({
-              game: { ...game, end_trigger: { ...game.end_trigger, type: value } }
+              game: { ...game, endTrigger: { ...game.endTrigger, type: value } }
             }) }
             options={ [{ text: 'Turns', value: 'turns' }, { text: 'Empty Piles', value: 'piles' }] }/> }
-          value={ game.end_trigger.qty || '' } type={ 'number' }
+          value={ game.endTrigger.qty || '' } type={ 'number' }
           onChange={ (event, { value }) => (this.setState({
-            game: { ...game, end_trigger: { ...game.end_trigger, qty: value } }
+            game: { ...game, endTrigger: { ...game.endTrigger, qty: value } }
           })) }/>
       </Form.Field>
       <Form.Group style={ { paddingLeft: '25px' } }>

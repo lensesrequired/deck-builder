@@ -60,12 +60,12 @@ class Game extends React.Component {
         })
           .then(async (response) => {
             if (this.state.game.deckId) {
-              const card_images = await response.json();
+              const cardImages = await response.json();
               if (!response.ok) {
-                throw ({ title: card_images.statusText || '', description: card_images.message || '' });
+                throw ({ title: cardImages.statusText || '', description: cardImages.message || '' });
               }
-              const images = card_images.reduce((acc, { id, data, modified_at }) => {
-                acc[id] = { data, modified_at };
+              const images = cardImages.reduce((acc, { _id, data, modifiedAt }) => {
+                acc[_id] = { data, modifiedAt };
                 return acc;
               }, {});
               this.setState({ images });
@@ -152,8 +152,8 @@ class Game extends React.Component {
       });
   };
 
-  getActionButtons = (curr_player) => {
-    if (curr_player.current_turn) {
+  getActionButtons = (currentPlayer) => {
+    if (currentPlayer.currentTurn) {
       return <div>
         <Button onClick={ () => this.card_action('draw', { 'num': 1 }) }>Draw</Button>
         <Button onClick={ () => this.turn_action('end') }>End Turn</Button>
@@ -165,7 +165,7 @@ class Game extends React.Component {
 
   render() {
     const { game = {}, deck, images, isLoading } = this.state;
-    const curr_player = game.curr_player > -1 ? game.players[game.curr_player] : {};
+    const currentPlayer = game.currentPlayer > -1 ? game.players[game.currentPlayer] : {};
 
     if (game.game_ended) {
       return (<main>
@@ -192,7 +192,7 @@ class Game extends React.Component {
       <main>
         <SemanticToastContainer/>
         { isLoading ? <div>LOADING...</div> : null }
-        <SettingsModal isOpen={ deck.cards && (!game.settings || game.curr_player < 0) } deck={ deck }
+        <SettingsModal isOpen={ deck.cards && (!game.settings || game.currentPlayer < 0) } deck={ deck }
                        images={ images } saveSettings={ this.saveSettings }/>
         <div>Destroyed: { (game.destroy || []).length } Cards</div>
         <div>Marketplace</div>
@@ -208,7 +208,7 @@ class Game extends React.Component {
                   <img alt={ 'card' } style={ { height: '250px', marginBottom: '10px' } }
                        src={ `data:image/png;base64,${ images[card.id].data }` }/> : <div>LOADING...</div> }
                 Qty: { card.qty }
-                { curr_player.current_turn ?
+                { currentPlayer.currentTurn ?
                   <Button onClick={ () => this.card_action('buy', { index }) }>Buy</Button> :
                   null }
               </div>
@@ -216,17 +216,17 @@ class Game extends React.Component {
           ) }
         </div>
 
-        { curr_player.name ?
+        { currentPlayer.name ?
           <div>
-            <div>{ curr_player.name }'s Hand</div>
+            <div>{ currentPlayer.name }'s Hand</div>
             <div>
-              Deck: { (curr_player.deck || []).length } Cards
+              Deck: { (currentPlayer.deck || []).length } Cards
               -
-              Discard: { (curr_player.discard || []).length } Cards
+              Discard: { (currentPlayer.discard || []).length } Cards
             </div>
             <div style={ { display: 'flex', flexDirection: 'row' } }>
               <div style={ { width: '20vw' } }>
-                <div>Buying Power: { ((curr_player.current_turn || {}).buying_power || {}).optional }</div>
+                <div>Buying Power: { ((currentPlayer.currentTurn || {}).buying_power || {}).optional }</div>
                 <div>Actions Left:</div>
                 <Table definition>
                   <Table.Header>
@@ -238,7 +238,7 @@ class Game extends React.Component {
                   </Table.Header>
 
                   <Table.Body>
-                    { Object.entries(curr_player.current_turn || {}).reduce((acc, [action_type, qtys]) => {
+                    { Object.entries(currentPlayer.currentTurn || {}).reduce((acc, [action_type, qtys]) => {
                       if (action_type !== 'buying_power') {
                         acc.push(<Table.Row>
                           <Table.Cell>{ action_type }</Table.Cell>
@@ -258,7 +258,7 @@ class Game extends React.Component {
                 overflowY: 'scroll', flexWrap: 'wrap', margin: '5px',
                 backgroundColor: 'lightgray'
               } }>
-                { curr_player.current_turn && (curr_player.hand || []).map((card, index) => (
+                { currentPlayer.currentTurn && ((currentPlayer.hand || {}).cards || []).map((card, index) => (
                   <div style={ { padding: '10px', display: 'flex', flexDirection: 'column' } }>
                     { images[card.id] ?
                       <img alt={ 'card' } style={ { height: '250px', marginBottom: '10px' } }
@@ -277,7 +277,7 @@ class Game extends React.Component {
               </div>
             </div>
             <div className={ 'row' } style={ { marginBottom: '10px' } }>
-              { this.getActionButtons(curr_player) }
+              { this.getActionButtons(currentPlayer) }
             </div>
           </div> : null }
       </main>
