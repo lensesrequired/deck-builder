@@ -93,10 +93,10 @@ class Game extends React.Component {
       });
   };
 
-  saveSettings = (settings) => {
-    fetch('/api/game/' + this.props.id + '/settings', {
+  saveSettings = ({ marketplace, ...settings }) => {
+    fetch('/api/game/' + this.props.id, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settings)
+      body: JSON.stringify({ settings, marketplace })
     }).then(async (response) => {
       if (!response.ok) {
         const res = await response.json();

@@ -34,10 +34,10 @@ class SettingsModal extends React.Component {
         }
       ],
       game: {
+        marketplace: {},
         numPlayers: '2',
         handSize: '5',
         startingDeck: {},
-        marketplace: {},
         turn: {
           pre: {
             'draw': { required: 0 },
