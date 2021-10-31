@@ -172,4 +172,4 @@ PlayerSchema.methods.buy = function({ index }, game) {
   return game;
 };
 
-module.exports = { Player: mongoose.models.Deck || mongoose.model('Player', PlayerSchema), PlayerSchema };
+module.exports = { Player: mongoose.models.Player || mongoose.model('Player', PlayerSchema), PlayerSchema };
