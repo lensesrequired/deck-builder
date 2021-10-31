@@ -16,34 +16,37 @@ export default async (req, res) => {
       try {
         Game.findById(id, async (err, game) => {
           err && res.send(err);
-          console.log(game);
-          game.players = Array(game.settings.numPlayers).map(async (player, index) => {
+          game.players = [];
+          let index = 0;
+          for (const newPlayer of Array(game.settings.numPlayers)) {
             const startingCards = new Deck();
             startingCards.cards = await game.settings.startingDeck.cards.reduce(async (deck, card) => {
               deck = await deck;
-              await new Promise((resolve) => {
-                Array(card.qty).forEach(() => {
+              for (const newCard of Array(card.qty)) {
+                await new Promise((r) => {
                   deck.push(card);
+                  r();
                 });
-                resolve();
-              });
-              console.log(deck);
+              }
               return deck;
             }, Promise.resolve([]));
-            startingCards.shuffle();
-            const startingHand = startingCards.cards.splice(0, game.settings.handSize);
+            const startingDeck = startingCards.shuffle();
+            const startingHand = startingDeck.splice(0, game.settings.handSize);
 
-            return new Player({
-              name: `Player ${ index }`,
-              deck: new Deck({ cards: startingCards }),
-              hand: new Deck({ cards: startingHand })
+            index++;
+            await new Promise((r) => {
+              game.players.push(Player({
+                name: `Player ${ index }`,
+                deck: new Deck({ cards: startingDeck }),
+                hand: new Deck({ cards: startingHand })
+              }));
+              r();
             });
-          });
+          }
           game.currentPlayer = 0;
-          console.log(game);
-          // game.save({}, (err, game) => {
-          //   err ? res.send(err) : res.send(game);
-          // });
+          game.save({}, (err, game) => {
+            err ? res.send(err) : res.send(game);
+          });
         });
       } catch (err) {
         console.log(err);
