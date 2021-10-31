@@ -54,7 +54,7 @@ const CardSchema = new Schema({
   }
 });
 
-CardSchema.methods.decreaseQty = () => {
+CardSchema.methods.decreaseQty = function() {
   this.qty -= 1;
 };
 

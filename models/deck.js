@@ -9,7 +9,7 @@ const DeckSchema = new Schema({
   }
 });
 
-DeckSchema.methods.shuffle = () => {
+DeckSchema.methods.shuffle = function() {
   return Array.from(this.cards).sort(() => Math.random() - 0.5);
 };
 

@@ -3,7 +3,7 @@ const _ = require('lodash');
 const Schema = mongoose.Schema;
 const { actionTypes } = require('../constants');
 const { Deck, DeckSchema } = require('./deck');
-const PlayerSchema = require('./player');
+const { PlayerSchema } = require('./player');
 
 const TurnSchema = new Schema(
   ['pre', 'during', 'post'].reduce((steps, turnStep) => {
@@ -11,12 +11,12 @@ const TurnSchema = new Schema(
       actions[actionType] = {
         required: {
           type: Number,
-          min: 0,
+          min: -1,
           default: 0
         },
         optional: {
           type: Number,
-          min: 0,
+          min: -1,
           default: 0
         }
       };
@@ -103,7 +103,7 @@ const GameSchema = new Schema({
   }
 });
 
-GameSchema.methods.isOver = () => {
+GameSchema.methods.isOver = function() {
   const { endTrigger: { type, qty } = {} } = this.settings;
 
   if (type === 'turns') {
@@ -114,7 +114,7 @@ GameSchema.methods.isOver = () => {
   }
   return false;
 };
-GameSchema.methods.calculateStats = () => {
+GameSchema.methods.calculateStats = function() {
   const stats = {
     playerPoints: {},
     winner: ['', -1]

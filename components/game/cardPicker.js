@@ -27,12 +27,13 @@ class CardPicker extends React.Component {
             display: 'flex', flexWrap: 'wrap', margin: '5px'
           } }>
             { cards.map((card) => (
-              <div style={ { padding: '10px', display: 'flex', flexDirection: 'column' } }>
-                { images[card._id] ?
-                  <img alt={ 'card' } style={ { height: '300px', marginBottom: '10px' } }
-                       src={ `data:image/png;base64,${ images[card._id].data }` }/> : 'LOADING...' }
-                <div><Input type="number" label='Qty' value={ selectedCards[card._id] || '' }
-                            onChange={ (_, { value }) => this.selectCard(card._id, value) }/>
+              <div style={ { margin: '10px', display: 'flex', flexDirection: 'column' } }>
+                {/*{ images[card._id] ?*/ }
+                {/*  <img alt={ 'card' } style={ { height: '300px', marginBottom: '10px' } }*/ }
+                {/*       src={ `data:image/png;base64,${ images[card._id].data }` }/> : `LOADING ${ card.name }...` }*/ }
+                <div>
+                  <Input type='number' label='Qty' value={ selectedCards[card._id] || '' }
+                         onChange={ (_, { value }) => this.selectCard(card._id, value) }/>
                 </div>
               </div>
             )) }

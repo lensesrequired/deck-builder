@@ -228,10 +228,10 @@ class Creator extends React.Component {
                    onClose={ () => this.setState({ isModalOpen: false }) }/>
         <div className={ 'row' }>
           <Button content={ 'Upload Cards' } onClick={ () => this.fileInputRef.current.click() }/>
-          <input ref={ this.fileInputRef } type="file" hidden onChange={ this.fileChange }/>
+          <input ref={ this.fileInputRef } type='file' hidden onChange={ this.fileChange }/>
           <Button onClick={ () => this.openCardModal() }>Add a Card</Button>
           <Button>
-            <a href={ `${ process.env.PUBLIC_URL }/deck_template.json` } download={ `deck_template.json` }>
+            <a href={ `/deck_template.json` } download={ `deck_template.json` }>
               Download Template</a>
           </Button>
         </div>
