@@ -83,11 +83,11 @@ class SettingsModal extends React.Component {
     this.setState({ game: { ...this.state.game, [name]: value } });
   };
 
-  changeAction = (turn_phase, action_type, action_qty_type, str_value) => {
+  changeAction = (turn_phase, actionType, action_qty_type, str_value) => {
     const int_value = parseInt(str_value, 10);
     if (!isNaN(int_value) || str_value === '') {
       const game = this.state.game;
-      game.turn[turn_phase][action_type][action_qty_type] = isNaN(int_value) ? '' : int_value;
+      game.turn[turn_phase][actionType][action_qty_type] = isNaN(int_value) ? '' : int_value;
       this.setState({ game });
     }
   };
@@ -103,15 +103,15 @@ class SettingsModal extends React.Component {
       </Table.Row>
     </Table.Header>
     <Table.Body>
-      { Object.entries(this.state.game.turn[turn_phase]).reduce((acc, [action_type, qtys]) => {
+      { Object.entries(this.state.game.turn[turn_phase]).reduce((acc, [actionType, qtys]) => {
         acc.push(<Table.Row>
-          <Table.Cell>{ action_type }</Table.Cell>
+          <Table.Cell>{ actionType }</Table.Cell>
           <Table.Cell><Input value={ qtys.required } type={ 'number' }
-                             onChange={ (event, { value }) => this.changeAction(turn_phase, action_type,
+                             onChange={ (event, { value }) => this.changeAction(turn_phase, actionType,
                                'required', value) }/></Table.Cell>
           { turn_phase === 'during'
             ? (<Table.Cell><Input value={ qtys.optional } type={ 'number' }
-                                  onChange={ (event, { value }) => this.changeAction(turn_phase, action_type,
+                                  onChange={ (event, { value }) => this.changeAction(turn_phase, actionType,
                                     'optional', value) }/></Table.Cell>)
             : null }
         </Table.Row>);

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const connectMongo = require('../../../../../../server');
-const Game = require('../../models/game');
-const { Player } = require('../../models/player');
+const Game = require('../../../../../../models/game');
+const { Player } = require('../../../../../../models/player');
 
 export default async (req, res) => {
   await connectMongo();
@@ -16,12 +16,16 @@ export default async (req, res) => {
         err && res.send(err);
         const { currentPlayer } = game;
         const player = new Player(game.players[currentPlayer]);
-        if (player.checkAction(actionType, actionType !== 'play')) {
-          game = player[actionType]({ index, num }, game);
+        const currentTurn = player.checkAction(actionType, actionType !== 'play');
+        let updatedPlayer = player;
+        if (currentTurn) {
+          updatedPlayer = player[actionType]({ index, num }, game);
         } else {
-          //TODO: Throw error
+          return res.status(403).send({ message: 'Action not allowed' });
         }
 
+        console.log(game.players[0].currentTurn);
+        game.players[currentPlayer] = updatedPlayer;
         game.save({}, (err, game) => {
           err ? res.send(err) : res.send(game);
         });

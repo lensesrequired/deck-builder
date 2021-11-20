@@ -140,7 +140,6 @@ class Creator extends React.Component {
     this.setState({ isDownloading: true });
     fetch(`/api/game/${ this.props.id }`, { method: 'POST' })
       .then(async (response) => {
-        console.log(response);
         const { _id } = await response.json();
         window.location = '/game?id=' + _id;
       });

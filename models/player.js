@@ -25,12 +25,12 @@ const PlayerSchema = new Schema({
       actions[actionType] = {
         required: {
           type: Number,
-          min: 0,
+          min: -1,
           default: 0
         },
         optional: {
           type: Number,
-          min: 0,
+          min: -1,
           default: 0
         }
       };
@@ -66,7 +66,7 @@ PlayerSchema.methods.endTurn = function(gameSettings) {
 PlayerSchema.methods.isTurnFinished = function() {
   const currentTurn = JSON.parse(JSON.stringify(this.currentTurn));
 
-  if ((this.deck.cards.length + this.discard.cards.length) === 0) {
+  if ((this.deck.cards.length + this.discardPile.cards.length) === 0) {
     delete currentTurn.draw;
   }
 
@@ -88,14 +88,14 @@ PlayerSchema.methods.checkAction = function(actionType, useAction = true) {
   }
 
   if (requiredQty > 0) {
-    this.currentTurn[action_type].required -= useAction ? 1 : 0;
-    return true;
+    this.currentTurn[actionType].required -= useAction ? 1 : 0;
+    return this.currentTurn;
   }
   if (optionalQty > 0) {
-    this.currentTurn[action_type].optional -= useAction ? 1 : 0;
-    return true;
+    this.currentTurn[actionType].optional -= useAction ? 1 : 0;
+    return this.currentTurn;
   }
-  return requiredQty === -1 || optionalQty === -1;
+  return (requiredQty === -1 || optionalQty === -1) && this.currentTurn;
 };
 PlayerSchema.methods.addAction = function(action) {
   // if there isn't any of this action already in the turn, create a dictionary for it
@@ -118,18 +118,18 @@ PlayerSchema.methods.addAction = function(action) {
     }
   }
 };
-PlayerSchema.methods.draw = function({ num }, game) {
+PlayerSchema.methods.draw = function({ num }) {
   if (this.deck.cards.length < num || num === -1) {
-    const shuffledDiscard = this.discard.shuffle();
+    const shuffledDiscard = this.discardPile.shuffle();
     this.deck.card += shuffledDiscard;
     this.discardPile.cards = [];
   }
 
   const newHandCards = this.deck.cards.splice(0, num === -1 ? this.deck.cards.length : num);
   this.hand.cards += newHandCards;
-  return game;
+  return this;
 };
-PlayerSchema.methods.discard = function({ index }, game) {
+PlayerSchema.methods.discard = function({ index }) {
   if (index) {
     const discardCard = this.hand.cards.splice(index, 1);
     this.discardPile.cards.push(discardCard);
@@ -137,10 +137,11 @@ PlayerSchema.methods.discard = function({ index }, game) {
     this.discardPile.cards += this.hand.cards;
     this.hand.cards = [];
   }
-  return game;
+  return this;
 };
-PlayerSchema.methods.play = function({ index }, game) {
+PlayerSchema.methods.play = function({ index }) {
   const playCard = this.hand.cards[index];
+  this.hand.cards[index].played = true;
   // get the actions from the card played (card at the index from the args in the player's hand)
   const actions = playCard.actions;
   // add the actions from the card to the current player's turn
@@ -153,23 +154,22 @@ PlayerSchema.methods.play = function({ index }, game) {
   }
 
   // add the buying power from the card to the players turn
-  this.addAction(player['current_turn'],
-    { 'type': 'buyingPower', 'required': false, 'qty': playCard.buyingPower || 0 });
+  this.addAction({ 'type': 'buyingPower', 'required': false, 'qty': playCard.buyingPower || 0 });
 
   // set the card in the hand as played and update the player in the game
   this.hand.cards[index].played = true;
-  return game;
+  return this;
 };
 PlayerSchema.methods.destroy = function({ index }, game) {
   const destroyCard = this.hand.cards.splice(index, 1);
   game.destroy.cards.push(destroyCard);
-  return game;
+  return this;
 };
 PlayerSchema.methods.buy = function({ index }, game) {
   const buyCard = game.marketplace.cards[index];
   game.marketplace.cards[index].decreaseQty();
-  this.discard.cards.push(buyCard);
-  return game;
+  this.discardPile.cards.push(buyCard);
+  return this;
 };
 
 module.exports = { Player: mongoose.models.Player || mongoose.model('Player', PlayerSchema), PlayerSchema };

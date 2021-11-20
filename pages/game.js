@@ -86,7 +86,9 @@ class Game extends React.Component {
         if (!response.ok) {
           throw ({ title: game.statusText || '', description: game.message || '' });
         }
-        this.setState({ game, isLoading: false });
+        this.setState({ game, isLoading: false }, () => {
+          this.turnAction('start');
+        });
       })
       .catch((err) => {
         toast(err);
@@ -118,14 +120,14 @@ class Game extends React.Component {
     }
   }
 
-  turn_action = (action) => {
+  turnAction = (action) => {
     fetch('/api/game/' + this.props.id + '/player/' + action, { method: 'POST' })
       .then(async (response) => {
         const res = await response.json();
-        if (!response.ok || await res !== 'OK') {
+        if (!response.ok || res.errors) {
           throw ({ title: res.statusText || '', description: res.message || '' });
         } else {
-          this.getGame();
+          this.setState({ game: res });
         }
       })
       .catch((err) => {
@@ -133,18 +135,18 @@ class Game extends React.Component {
       });
   };
 
-  card_action = (action, query = {}) => {
-    let url = `/game/${ this.props.id }/player/card/${ action }`;
+  cardAction = (action, query = {}) => {
+    let url = `/api/game/${ this.props.id }/player/card/${ action }`;
     if (query) {
       url += `?${ Object.entries(query).map(([key, value]) => (`${ key }=${ value }`)).join('&') }`;
     }
     fetch(url, { method: 'POST' })
       .then(async (response) => {
         const res = await response.json();
-        if (!response.ok || await res !== 'OK') {
+        if (!response.ok || res.errors) {
           throw ({ title: response.statusText || '', description: res.message || '' });
         } else {
-          this.getGame();
+          this.setState({ game: res });
         }
       })
       .catch((err) => {
@@ -155,12 +157,12 @@ class Game extends React.Component {
   getActionButtons = (currentPlayer) => {
     if (currentPlayer.currentTurn) {
       return <div>
-        <Button onClick={ () => this.card_action('draw', { 'num': 1 }) }>Draw</Button>
-        <Button onClick={ () => this.turn_action('end') }>End Turn</Button>
+        <Button onClick={ () => this.cardAction('draw', { 'num': 1 }) }>Draw</Button>
+        <Button onClick={ () => this.turnAction('end') }>End Turn</Button>
       </div>;
     }
 
-    return (<Button onClick={ () => this.turn_action('start') }>Start Turn</Button>);
+    return (<Button onClick={ () => this.turnAction('start') }>Start Turn</Button>);
   };
 
   render() {
@@ -194,7 +196,7 @@ class Game extends React.Component {
         { isLoading ? <div>LOADING...</div> : null }
         <SettingsModal isOpen={ deck.cards && (!game.settings || game.currentPlayer < 0) } deck={ deck }
                        images={ images } saveSettings={ this.saveSettings }/>
-        <div>Destroyed: { (game.destroy || []).length } Cards</div>
+        <div>Destroyed: { ((game.destroy || []).length) || '0' } Cards</div>
         <div>Marketplace</div>
         <div style={ {
           display: 'flex', width: '100vw', height: '60vh',
@@ -204,12 +206,13 @@ class Game extends React.Component {
           { ((game.marketplace || {}).cards || []).map(
             (card, index) => (
               <div style={ { padding: '10px', display: 'flex', flexDirection: 'column' } }>
-                { images[card.id] ?
+                { images[card._id] ?
                   <img alt={ 'card' } style={ { height: '250px', marginBottom: '10px' } }
-                       src={ `data:image/png;base64,${ images[card.id].data }` }/> : <div>LOADING...</div> }
+                       src={ `data:image/png;base64,${ images[card._id].data }` }/> :
+                  <div>LOADING { card.name }...</div> }
                 Qty: { card.qty }
                 { currentPlayer.currentTurn ?
-                  <Button onClick={ () => this.card_action('buy', { index }) }>Buy</Button> :
+                  <Button onClick={ () => this.cardAction('buy', { index }) }>Buy</Button> :
                   null }
               </div>
             )
@@ -238,10 +241,10 @@ class Game extends React.Component {
                   </Table.Header>
 
                   <Table.Body>
-                    { Object.entries(currentPlayer.currentTurn || {}).reduce((acc, [action_type, qtys]) => {
-                      if (action_type !== 'buying_power') {
+                    { Object.entries(currentPlayer.currentTurn || {}).reduce((acc, [actionType, qtys]) => {
+                      if (actionType !== 'buying_power') {
                         acc.push(<Table.Row>
-                          <Table.Cell>{ action_type }</Table.Cell>
+                          <Table.Cell>{ actionType }</Table.Cell>
                           <Table.Cell>{ ((qtys.required === '-1' || qtys.required === -1) &&
                             <Icon icon={ infinityIcon }/>) || qtys.required || 0 }</Table.Cell>
                           <Table.Cell>{ ((qtys.optional === '-1' || qtys.optional === -1) &&
@@ -260,17 +263,18 @@ class Game extends React.Component {
               } }>
                 { currentPlayer.currentTurn && ((currentPlayer.hand || {}).cards || []).map((card, index) => (
                   <div style={ { padding: '10px', display: 'flex', flexDirection: 'column' } }>
-                    { images[card.id] ?
+                    { images[card._id] ?
                       <img alt={ 'card' } style={ { height: '250px', marginBottom: '10px' } }
-                           src={ `data:image/png;base64,${ images[card.id].data }` }/> : 'LOADING...' }
-                    <Button disabled={ card.played } onClick={ () => this.card_action('play', { index }) }>
+                           src={ `data:image/png;base64,${ images[card._id].data }` }/> :
+                      <div>LOADING { card.name }..</div> }
+                    <Button disabled={ card.played } onClick={ () => this.cardAction('play', { index }) }>
                       { card.played ? 'Played' : 'Play' }
                     </Button>
                     <div className={ 'row' }>
                       <Button disabled={ card.played }
-                              onClick={ () => this.card_action('discard', { index }) }>Discard</Button>
+                              onClick={ () => this.cardAction('discard', { index }) }>Discard</Button>
                       <Button disabled={ card.played }
-                              onClick={ () => this.card_action('destroy', { index }) }>Destroy</Button>
+                              onClick={ () => this.cardAction('destroy', { index }) }>Destroy</Button>
                     </div>
                   </div>
                 )) }

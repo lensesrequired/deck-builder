@@ -61,7 +61,7 @@
       {
         "qty": "1",
         "required": false,
-        "type": "action"
+        "type": "play"
       },
       {
         "qty": "2",
@@ -86,7 +86,7 @@
       {
         "qty": "1",
         "required": false,
-        "type": "action"
+        "type": "play"
       }
     ],
     "art": "items/Artifact_helmet.PNG",
@@ -106,7 +106,7 @@
       {
         "qty": "2",
         "required": false,
-        "type": "action"
+        "type": "play"
       },
       {
         "qty": "1",
@@ -131,7 +131,7 @@
       {
         "qty": "1",
         "required": false,
-        "type": "action"
+        "type": "play"
       }
     ],
     "art": "characters/FantasyCardsPack_003.PNG",

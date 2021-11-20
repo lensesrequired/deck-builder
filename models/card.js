@@ -51,6 +51,10 @@ const CardSchema = new Schema({
   victoryPoints: {
     type: Number,
     default: 0
+  },
+  played: {
+    type: Boolean,
+    default: false
   }
 });
 
